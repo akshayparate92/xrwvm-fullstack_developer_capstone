@@ -39,13 +39,6 @@ def login_user(request):
         data = {"userName": username, "status": "Authenticated"}
     return JsonResponse(data)
     
-def get_request(url, headers=None, params=None):
-    response = requests.get(
-        url,
-        headers=headers,
-        params=params
-    )
-    return response.json()
 # Create a `logout_request` view to handle sign out request
 def logout_request(request):
     logout(request) # Terminate user session
@@ -133,18 +126,29 @@ def get_dealer_details(request, dealer_id):
 
 
 def get_dealer_reviews(request, dealer_id):
-    # if dealer id has been provided
-    if(dealer_id):
-        endpoint = "/fetchReviews/dealer/"+str(dealer_id)
+    if dealer_id:
+        endpoint = "/fetchReviews/dealer/" + str(dealer_id)
         reviews = get_request(endpoint)
+
         for review_detail in reviews:
             response = analyze_review_sentiments(review_detail['review'])
-            print(response)
-            review_detail['sentiment'] = response['sentiment']
-        return JsonResponse({"status":200,"reviews":reviews})
-    else:
-        return JsonResponse({"status":400,"message":"Bad Request"})
 
+            print("Sentiment response:", response)
+
+            if response is not None:
+                review_detail['sentiment'] = response['sentiment']
+            else:
+                review_detail['sentiment'] = 'neutral'
+
+        return JsonResponse({
+            "status": 200,
+            "reviews": reviews
+        })
+
+    return JsonResponse({
+        "status": 400,
+        "message": "Bad Request"
+    })
 
 def add_review(request):
     if(request.user.is_anonymous == False):
