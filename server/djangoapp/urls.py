@@ -3,11 +3,6 @@ from django.conf.urls.static import static
 from django.urls import path
 
 from . import views
-from .restapis import (
-    analyze_review_sentiments,
-    get_request,
-    post_review,
-)
 
 app_name = "djangoapp"
 
